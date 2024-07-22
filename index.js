@@ -4,7 +4,8 @@ const validURL = require('@7c/validurl');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const JSDOM = require('jsdom').JSDOM;
-const port = process.env.PORT;
+
+const port = process.env.PORT || 3000;
 const app = express();
 
 const rateLimiter = rateLimit({
@@ -15,7 +16,6 @@ const rateLimiter = rateLimit({
 });
 
 app.use(rateLimiter);
-
 app.use(express.urlencoded({
   extended: true,
   limit: '10mb'
@@ -82,8 +82,19 @@ app.post('/', function(req, res) {
 		 res.status(400).send("Could not parse that document");
 		}
 	}
-
 });
 
-app.listen(port, () => {	
-})
+// Nouvelle route de santé
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Gestion globale des erreurs
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
